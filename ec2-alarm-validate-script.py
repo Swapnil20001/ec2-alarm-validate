@@ -1,5 +1,6 @@
 import boto3
 import json
+import pandas as pd
 
 # Initialize Boto3 clients
 region_name = "ap-south-1"
@@ -7,7 +8,7 @@ ec2_client = boto3.client('ec2', region_name=region_name)
 cloudwatch_client = boto3.client('cloudwatch', region_name=region_name)
 
 # Function to retrieve alarms for a given instance ID, metric name, and namespace
-def get_instance_alarms(instance_id, metric_name, namespace):
+def get_instance_alarms(instance_id, metric_name, namespace, threshold1, threshold2):
     alarms = []
     response = cloudwatch_client.describe_alarms_for_metric(
         Dimensions=[{'Name': 'InstanceId', 'Value': instance_id}],
@@ -28,21 +29,18 @@ def get_instance_alarms(instance_id, metric_name, namespace):
             alarmname = alarm['AlarmName']
             alarmconfig = True
             validation = 'fail'
-            if alarm['Threshold'] == 70 or alarm['Threshold'] == 75:
-                reason = "Threshold not matched"
-            elif alarm['EvaluationPeriods'] == 2:
-                reason = 'Datapoint not matched'
-            elif alarm['Period'] == 300:
-                reason = 'period not matched'
-            else:
-                reason = 'notconfigured'
+            reason = 'notconfigured'
 
-            # Check if alarm threshold is 70 or above
-            if alarm['Threshold'] == 70 or alarm['Threshold'] == 75:
+            # Check if alarm threshold matches the specified thresholds
+            if alarm['Threshold'] == threshold1 or alarm['Threshold'] == threshold2:
                 # Check if alarm has 2 datapoints and period is 300 seconds (5 minutes)
                 if alarm['EvaluationPeriods'] == 2 and alarm['Period'] == 300:
                     validation = 'pass'
                     reason = 'Success'
+                else:
+                    reason = 'Datapoint not matched'
+            else:
+                reason = 'Threshold not matched'
 
             alarms.append({
                 'alarmname': alarmname,
@@ -56,6 +54,14 @@ def get_instance_alarms(instance_id, metric_name, namespace):
 response = ec2_client.describe_instances()
 instances = response['Reservations']
 
+# Specify thresholds for CPU, disk, and memory
+cpu_threshold1 = 75
+cpu_threshold2 = 70
+memory_threshold1 = 70
+memory_threshold2 = 80
+disk_threshold1 = 60
+disk_threshold2 = 75
+
 # Namespaces to check for alarms
 namespaces_cpu = ['AWS/EC2']
 namespaces_memory = ['CWAgent']
@@ -68,13 +74,13 @@ for reservation in instances:
         instance_id = instance['InstanceId']
         alarms_cpu = []
         for namespace in namespaces_cpu:
-            alarms_cpu += get_instance_alarms(instance_id, 'CPUUtilization', namespace)
+            alarms_cpu += get_instance_alarms(instance_id, 'CPUUtilization', namespace, cpu_threshold1, cpu_threshold2)
         alarms_memory = []
         for namespace in namespaces_memory:
-            alarms_memory += get_instance_alarms(instance_id, 'mem_used_percent', namespace)
+            alarms_memory += get_instance_alarms(instance_id, 'mem_used_percent', namespace, memory_threshold1, memory_threshold2)
         alarms_disk = []
         for namespace in namespaces_disk:
-            alarms_disk += get_instance_alarms(instance_id, 'disk_used_percent', namespace)
+            alarms_disk += get_instance_alarms(instance_id, 'disk_used_percent', namespace, disk_threshold1, disk_threshold2)
 
         result[instance_id] = {
             'CPU': alarms_cpu or [{
@@ -99,3 +105,4 @@ for reservation in instances:
 
 # Print the JSON document
 print(json.dumps(result, indent=4))
+
