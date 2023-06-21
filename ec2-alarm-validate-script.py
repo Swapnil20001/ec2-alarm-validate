@@ -5,6 +5,8 @@ import pandas as pd
 # Initialize Boto3 clients
 region_name = "ap-south-1"
 ec2_client = boto3.client('ec2', region_name=region_name)
+paginator = ec2_client.get_paginator('describe_instances')
+
 cloudwatch_client = boto3.client('cloudwatch', region_name=region_name)
 
 # Function to retrieve alarms for a given instance ID, metric name, and namespace
@@ -51,7 +53,8 @@ def get_instance_alarms(instance_id, metric_name, namespace, threshold1, thresho
     return alarms
 
 # Get list of instances
-response = ec2_client.describe_instances()
+response = paginator.paginate().build_full_result()
+#ec2_client.describe_instances()
 instances = response['Reservations']
 
 # Specify thresholds for CPU, disk, and memory
