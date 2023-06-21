@@ -2,6 +2,7 @@ import boto3
 import json
 import pandas as pd
 
+
 # Initialize Boto3 clients
 region_name = "ap-south-1"
 ec2_client = boto3.client('ec2', region_name=region_name)
@@ -22,7 +23,8 @@ def get_instance_alarms(instance_id, metric_name, namespace, threshold1, thresho
         # Alarm not configured for the metric
         alarms.append({
             'alarmname': None,
-            'alarmconfig': False,
+            # 'alarmconfig': False, # it will give blank space in alarm section.
+            'alarmconfig': 'No',
             'Validation': 'fail',
             'Reason': 'alarm not configured'
         })
@@ -54,8 +56,9 @@ def get_instance_alarms(instance_id, metric_name, namespace, threshold1, thresho
 
 # Get list of instances
 response = paginator.paginate().build_full_result()
-#ec2_client.describe_instances()
 instances = response['Reservations']
+
+# print(response)
 
 # Specify thresholds for CPU, disk, and memory
 cpu_threshold1 = 75
@@ -107,5 +110,26 @@ for reservation in instances:
         }
 
 # Print the JSON document
-print(json.dumps(result, indent=4))
-
+json_data_str = json.dumps(result, indent=4)
+print(json_data_str)
+json_data = json.loads(json_data_str)
+# print(json_data)
+# print(type(json_data))
+data = []
+for instance_id, metrics in json_data.items():
+    for metric, alarms in metrics.items():
+        for alarm in alarms:
+            # alarm_configured = "Yes" if alarm["alarmconfig"] else "No"
+            data.append({
+                "Instance ID": instance_id,
+                "Metric": metric,
+                "Alarm Name": alarm["alarmname"] or 'No',
+                "Alarm_Configured": alarm["alarmconfig"],
+                # "Alarm_Configured": alarm_configured,
+                "Validation": alarm["Validation"],
+                "Reason": alarm["Reason"]
+            })
+df = pd.DataFrame(data)
+df['Alarm_Configured'] = df['Alarm_Configured'].map({ 'No': 'No', 1: 'Yes'}) # Map 1 to "Yes"
+df.to_excel("alarm_for_instance.xlsx", index=False)
+print("excel for alarm validation created successfully")
