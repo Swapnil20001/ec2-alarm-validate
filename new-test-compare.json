@@ -1,0 +1,90 @@
+{
+    "i-ssdsd": {
+        "CPU": [{
+            "alarmname": "cpu-percent",
+            "alarmconfig": true,
+            "Validation": "pass",
+            "Reason": "Success",
+            "threshold": 75.0, 
+            "datapoint": 2, 
+            "period": 300,
+            "alarmThreshold": 75.0, 
+            "alarmDatapoint": 2, 
+            "alarmPeriod": 300
+        },
+        {
+            "alarmname": "cpu-75-percent",
+            "alarmconfig": true,
+            "Validation": "pass",
+            "Reason": "Success",
+            "threshold": 75.0, 
+            "datapoint": 2, 
+            "period": 300,
+            "alarmThreshold": 75.0, 
+            "alarmDatapoint": 2, 
+            "alarmPeriod": 300
+        }],
+        "Memory": [{
+            "alarmname": null,
+            "alarmconfig": false,
+            "Validation": "fail",
+            "Reason": "alarm not configured"
+        },
+        {
+            "alarmname": "mem",
+            "alarmconfig": true,
+            "Validation": "pass",
+            "Reason": "Success",
+            "threshold": 75.0, 
+            "datapoint": 2, 
+            "period": 300,
+            "alarmThreshold": 75.0, 
+            "alarmDatapoint": 2, 
+            "alarmPeriod": 300
+        }],
+        "Disk": [{
+            "alarmconfig": true,
+            "Validation": "fail",
+            "Reason": "Datapoint not matched",
+            "threshold": 75.0, 
+            "datapoint": 2, 
+            "period": 300,
+            "alarmThreshold": 75.0, 
+            "alarmDatapoint": 2, 
+            "alarmPeriod": 300
+        }
+       ]
+    },
+    "i-regf45gvd": {
+        "CPU": [{
+            "alarmname": null,
+            "alarmconfig": false,
+            "Validation": "fail",
+            "Reason": "alarm not configured"
+        }],
+        "Memory": [{
+            "alarmname": "mem-70-percent",
+            "alarmconfig": true,
+            "Validation": "fail",
+            "Reason": "Datapoint not matched",
+            "threshold": 75.0, 
+            "datapoint": 2, 
+            "period": 300,
+            "alarmThreshold": 75.0, 
+            "alarmDatapoint": 2, 
+            "alarmPeriod": 300
+        }],
+        "Disk": [{
+            "alarmname": "data",
+            "alarmconfig": true,
+            "Validation": "fail",
+            "Reason": "Datapoint not matched",
+            "threshold": 75.0, 
+            "datapoint": 2, 
+            "period": 300,
+            "alarmThreshold": 75.0, 
+            "alarmDatapoint": 2, 
+            "alarmPeriod": 300
+        }]
+    }
+}
